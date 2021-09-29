@@ -21,13 +21,16 @@ int sensorValue = 0;        // value read from the pot
 int outputValue = 0;        // value output to the PWM (analog out)
 
 String mensaje;
-char caracter;
+
+ int newTime = 0;
+ int x = 0;
+ int dutyCycle = 0;
+ int sec = 0;
+ int check = 0;
 
 void setup() {
   
   Serial.begin(115200);
-
-  
 
   ledcAttachPin(analogOutPin, PWM1_Ch);
   ledcSetup(PWM1_Ch, PWM1_Freq, PWM1_Res);
@@ -37,33 +40,100 @@ void setup() {
   timerAttachInterrupt(timer, &onTimer, true);
   timerAlarmWrite(timer, 10000000, true);
   timerAlarmEnable(timer);
+
+ 
+
 }
 
 void loop() {
 
   if(Serial.available()>0){
-    caracter = (char)Serial.read();
-    mensaje += caracter;
+    mensaje = Serial.readString();
     
     Serial.print(mensaje);
+    //Serial.print(mensaje.substring(0,3));
 
-    switch (mensaje)
+   if (mensaje.substring(0,3) == "ADC"){
 
-      case xxx:
         sensorValue = analogRead(analogInPin);
         Serial.print("sensor = ");
         Serial.println(sensorValue);
-        break;
 
-      case xxx:
-        newTime = x*1000000;
-        timerAlarmWrite(timer, x, true);
-        timerAlarmEnable(timer);
-        break;
+        check = mensaje.charAt(4) - '0';
 
-      case xxx:
-        outputValue = 4096/9
+        if (mensaje.length() > 5 && (check > 0 && check < 10)){
+
+        char info[mensaje.length()-6] = "";
+        Serial.print("Tamaño mensaje: ");
+        Serial.println(mensaje.length());
+        Serial.print("Tamaño info: ");
+        Serial.println(mensaje.length()-6);
+        Serial.print("Info: ");
+        Serial.println(info);
+
+        Serial.println("Paso 1");
+
+        //pongo en info los caracteres del tiempo pasado por teclado
+
+        for(int i = 4;i < mensaje.length() - 2;i++){
+
+          Serial.println("Paso 2");
+          Serial.println(i);
+
+        info[i-4] = mensaje.charAt(i);
+
+        Serial.println(mensaje.charAt(i));
+
+        }
+
+        Serial.print("info: ");
+        Serial.println(info);
+
+        //lo transformo a int
+
+        for (int i = 0; i <= mensaje.length() - 7;i++){
+
+          Serial.println("Paso 3");
+        
+        sec += (info[i] - '0')*pow(10,(mensaje.length() - 7) - i);
+
+        Serial.println(info[i] - '0');
+        
+        }
+
+        Serial.print("Segundos: ");
+        Serial.println(sec);
+              
+        newTime = sec*1000000;
+        timerAlarmWrite(timer, newTime, true);
+        timerAlarmEnable(timer); 
+
+        sec = 0;
+             
+        }}else{
+          
+          if (sec == 0){
+            timerAlarmDisable(timer);
+            
+          }
+        }
+       
+   }
+   else
+     {
+      if (mensaje.substring(0,3) == "PWM"){
+        
+        outputValue = 4096/9;
+        
+        char info = mensaje.charAt(4);
+        dutyCycle = info - '0';
+
+        if(dutyCycle > 0 && dutyCycle <= 9){
+       
         ledcWrite(PWM1_Ch, outputValue*dutyCycle);
+       Serial.print("dutyCycle: ");
+       Serial.println(outputValue*dutyCycle);
+     }
     
     }
     
