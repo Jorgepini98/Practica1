@@ -1,13 +1,20 @@
 #include <MPU9250_asukiaaa.h>
 
+//defino los pines del I2C para el ESP32
 #ifdef _ESP32_HAL_I2C_H_
 #define SDA_PIN 21
 #define SCL_PIN 22
 #endif
 
+// se define el objeto utilizado para esta libreria
 MPU9250_asukiaaa mySensor;
+// Defino variables
 double aX, aY, aZ, aSqrt;
 uint8_t sensorId;
+
+//Como en la primera parte, se va ha utilizar una interrupción. Dado que se quiere ver las medidas del acelerómetro cada 100ms, 
+//La interrupción de define cada 100ms, y tomaremos como referencia un contador de la interruciones para las otras funciones, 
+// led 200ms(2 interrupciones) y mostrar datos cada 1sec (10 interruciones)
 
 volatile int interruptCounter;
 int totalInterruptCounter;
@@ -30,6 +37,8 @@ long LedCounter = 0;
 boolean LedOn = false;
 
 void setup() {
+
+  //inicializo
   
   Serial.begin(115200);
   while(!Serial);
@@ -62,11 +71,7 @@ if (interruptCounter > 0) {
  
     totalInterruptCounter++;
   
-//  if (mySensor.readId(&sensorId) == 0) {
-//    Serial.println("sensorId: " + String(sensorId));
-//  } else {
-//    Serial.println("Cannot read sensorId");
-//  }
+// leo sensor
 
   if (mySensor.accelUpdate() == 0) {
     aX = mySensor.accelX();
@@ -77,17 +82,19 @@ if (interruptCounter > 0) {
     Serial.println("Cannod read accel values");
   }
 
+// apaga led
   if (totalInterruptCounter - LedCounter >= 2 && LedOn == true){
     ledcWrite(PWM1_Ch, 0);
     Serial.println("Led off");
     LedOn = false;
   }
-  
+
+  //muestra por pantalla la info y enciende led
   if (totalInterruptCounter % 10 == 0){
     Serial.println("accelX: " + String(aX));
     Serial.println("accelY: " + String(aY));
     Serial.println("accelZ: " + String(aZ));
-    Serial.println("accelSqrt: " + String(aSqrt));
+    //Serial.println("accelSqrt: " + String(aSqrt));
     
     ledcWrite(PWM1_Ch, 256);
     LedOn = true;
