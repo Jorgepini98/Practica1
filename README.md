@@ -1,2 +1,5 @@
 # Practica1
-Los objetivos son: Familiarizarse con el sistema de desarrollo ESP32 Manejar los periféricos típicos de cualquier microcontrolador: ADC, PWM, Timer, etc. 
+Los objetivos son:
+-	Poner en práctica los conocimientos de redes inalámbricas WIFI 
+-	Manejar comunicaciones IP a bajo nivel mediante sockets y entre diversas plataformas: PC, Móvil, CLOUD, Sensor
+-	Manejar protocolos de alto nivel: HTTP, FTP, NTP, MQTT y estándares de interoperabilidad: SENML
